@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/rdhyee/gitberg.git
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+git://github.com/rdhyee/pg-epubmaker.git
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: UhtGzpVy2cm7VRZ7KgOlwJOjUW7DunodDTDNNWwmfkMq/eGow61jw9rEJRW904cinoNxJtqYypBhlxwjXLPrONxAm65CNrMCYcwomFa2GKaA/Qm0hAVjoarElLbFJ4OCj4FdQ7eXMTxLFS0IGTDjEwF5qJwRAK3iGWju+SOmN+zMj22apIta+9sthsAuKUXFt+FDWdFynALqBwTaZ7V4dxXjLcQmf8tZQhsQdTeEkwSvwlpFiL7jwsRLv0Eo3rtQa5h3OvhjduNFnCGBsRmJDyVrFe2WOEe2/6QqqL6OwKv+V/n4vTdIb453do0DuN0KFVSzep8I5viB4Fb2U2CuIvpd7Xm3gdC8teghauCu1hu9QCHDK1uSDxfUWBuYr5NXyJ+hc2os8PUC/zBNfo6LfPQ8qM/ohv1SMwbhgG0MkCMsluA81iEgRN2u9BlvXM/3su1pkeTlCy6eRqBpVU1Qfje7bn4CgHUzHZx9duQ0zOR/H0HZNrxE6/4Domk7FHo9hn4kVivIHvjsX+Rw8W4sv/psKSc/tvtiCHS1ngS2BBuEBX66OX7vbS16KIdvU6fbueauuQOVfzJ7nxbMJodX9RCIH75t2PICF9/GNSeMJFpY18vqeJpvyKobU7lIIay43bBlRt9sgjIbQ+lqJ2HpzgX1yUkqYgZ+DW4nDxm6QEY=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: rdhyee/King-Arthur-and-the-Knights-of-the-Round-Table_36462
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
